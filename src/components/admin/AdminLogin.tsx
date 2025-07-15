@@ -20,7 +20,7 @@ const AdminLogin = () => {
   const [error, setError] = useState('');
   const [signupEnabled, setSignupEnabled] = useState(true);
   
-  const { signIn, isAdmin, isEditor, isSuperAdmin, loading: authLoading, profile } = useAuth();
+  const { signIn, isAdmin, isEditor, isSuperAdmin, loading: authLoading, initializing, profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -40,11 +40,11 @@ const AdminLogin = () => {
 
   // Rediriger si déjà connecté
   useEffect(() => {
-    if (!authLoading && profile && (isAdmin || isEditor || isSuperAdmin)) {
-      console.log('✅ Utilisateur admin connecté, redirection...');
+    if (!authLoading && !initializing && profile && (isAdmin || isEditor || isSuperAdmin)) {
+      // console.log('✅ Utilisateur admin connecté, redirection...');
       navigate('/admin', { replace: true });
     }
-  }, [isAdmin, isEditor, isSuperAdmin, authLoading, navigate, profile]);
+  }, [isAdmin, isEditor, isSuperAdmin, authLoading, initializing, navigate, profile]);
 
   const validateForm = () => {
     if (!email.trim()) {
@@ -81,11 +81,11 @@ const AdminLogin = () => {
     setError('');
 
     try {
-      console.log('🔑 Tentative de connexion admin pour:', email);
+      // console.log('🔑 Tentative de connexion admin pour:', email);
       const { user, error: signInError } = await signIn(email, password, rememberMe);
       
       if (signInError) {
-        console.error('❌ Erreur de connexion:', signInError);
+        // console.error('❌ Erreur de connexion:', signInError);
         
         // Messages d'erreur personnalisés
         if (signInError.message.includes('Invalid login credentials')) {
@@ -108,7 +108,7 @@ const AdminLogin = () => {
           variant: "destructive",
         });
       } else if (user) {
-        console.log('✅ Connexion réussie pour:', user.email);
+        // console.log('✅ Connexion réussie pour:', user.email);
         toast({
           title: "Connexion réussie",
           description: "Bienvenue dans l'administration !",
@@ -129,25 +129,23 @@ const AdminLogin = () => {
     }
   };
 
-  // Affichage du loader pendant la vérification de l'auth
-  if (authLoading) {
+  // Affichage minimal pendant l'initialisation
+  if (initializing) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
-          <p className="text-gray-400">Vérification de l'authentification...</p>
+      <div className="min-h-screen bg-slate-950">
+        <div className="fixed top-0 left-0 w-full h-1 bg-slate-800">
+          <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse"></div>
         </div>
       </div>
     );
   }
 
-  // Si déjà connecté en tant qu'admin, afficher un message de redirection
-  if (profile && (isAdmin || isEditor || isSuperAdmin)) {
+  // Si déjà connecté en tant qu'admin, redirection silencieuse
+  if (!initializing && profile && (isAdmin || isEditor || isSuperAdmin)) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
-          <p className="text-gray-400">Redirection vers l'administration...</p>
+      <div className="min-h-screen bg-slate-950">
+        <div className="fixed top-0 left-0 w-full h-1 bg-slate-800">
+          <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse"></div>
         </div>
       </div>
     );

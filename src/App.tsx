@@ -25,40 +25,38 @@ import { authService } from './lib/auth';
 
 // Composant pour protéger les routes admin
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAdmin, isEditor, isSuperAdmin, loading } = useAuth();
+  const { isAdmin, isEditor, isSuperAdmin, loading, initializing } = useAuth();
   
-  console.log('ProtectedRoute - isAdmin:', isAdmin, 'isEditor:', isEditor, 'isSuperAdmin:', isSuperAdmin, 'loading:', loading);
+  // console.log('ProtectedRoute - isAdmin:', isAdmin, 'isEditor:', isEditor, 'isSuperAdmin:', isSuperAdmin, 'loading:', loading);
   
-  if (loading) {
+  if (initializing) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
-          <p className="text-gray-400">Vérification des permissions...</p>
+      <div className="min-h-screen bg-slate-950">
+        <div className="fixed top-0 left-0 w-full h-1 bg-slate-800">
+          <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse"></div>
         </div>
       </div>
     );
   }
   
   if (!isAdmin && !isEditor) {
-    console.log('Utilisateur non admin, redirection vers login');
+    // console.log('Utilisateur non admin, redirection vers login');
     return <Navigate to="/admin/login" replace />;
   }
   
-  console.log('Utilisateur autorisé, accès accordé');
+  // console.log('Utilisateur autorisé, accès accordé');
   return <>{children}</>;
 };
 
 // Composant pour protéger les routes admin uniquement
 const AdminOnlyRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAdmin, isSuperAdmin, loading } = useAuth();
+  const { isAdmin, isSuperAdmin, loading, initializing } = useAuth();
   
-  if (loading) {
+  if (initializing) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
-          <p className="text-gray-400">Vérification des permissions...</p>
+      <div className="min-h-screen bg-slate-950">
+        <div className="fixed top-0 left-0 w-full h-1 bg-slate-800">
+          <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse"></div>
         </div>
       </div>
     );
@@ -73,14 +71,13 @@ const AdminOnlyRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Composant pour protéger les routes super admin uniquement
 const SuperAdminOnlyRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isSuperAdmin, loading } = useAuth();
+  const { isSuperAdmin, loading, initializing } = useAuth();
   
-  if (loading) {
+  if (initializing) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
-          <p className="text-gray-400">Vérification des permissions...</p>
+      <div className="min-h-screen bg-slate-950">
+        <div className="fixed top-0 left-0 w-full h-1 bg-slate-800">
+          <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse"></div>
         </div>
       </div>
     );

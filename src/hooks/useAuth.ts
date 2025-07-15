@@ -8,6 +8,7 @@ export function useAuth() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initializing, setInitializing] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
@@ -17,7 +18,7 @@ export function useAuth() {
 
     const initialize = async () => {
       try {
-        console.log('🔄 Initialisation useAuth...');
+        // console.log('🔄 Initialisation useAuth...');
         
         // Initialiser le service d'authentification
         await authService.initialize();
@@ -28,12 +29,12 @@ export function useAuth() {
         const { data: { session }, error } = await supabase.auth.getSession();
 
         if (error) {
-          console.warn('⚠️ Erreur getSession:', error.message);
+          // console.warn('⚠️ Erreur getSession:', error.message);
           
           // Gérer les erreurs de token de rafraîchissement
           if (error.message?.includes('refresh_token_not_found') || 
               error.message?.includes('Refresh Token Not Found')) {
-            console.log('🔄 Token invalide, nettoyage...');
+            // console.log('🔄 Token invalide, nettoyage...');
             await authService.signOut();
           }
         }
@@ -52,11 +53,13 @@ export function useAuth() {
           }
 
           setLoading(false);
+          setInitializing(false);
         }
       } catch (error) {
-        console.error('❌ Erreur initialize useAuth:', error);
+        // console.error('❌ Erreur initialize useAuth:', error);
         if (mounted) {
           setLoading(false);
+          setInitializing(false);
         }
       }
     };
@@ -66,7 +69,7 @@ export function useAuth() {
     // Écouter les changements d'état d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔄 Auth state changed:', event);
+        // console.log('🔄 Auth state changed:', event);
 
         if (!mounted) return;
 
@@ -85,6 +88,7 @@ export function useAuth() {
         }
 
         setLoading(false);
+        setInitializing(false);
       }
     );
 
@@ -110,12 +114,12 @@ export function useAuth() {
     setIsAdmin(newIsAdmin);
     setIsEditor(newIsEditor);
 
-    console.log('🎭 Rôles mis à jour:', {
-      role: userProfile.role,
-      isSuperAdmin: newIsSuperAdmin,
-      isAdmin: newIsAdmin,
-      isEditor: newIsEditor
-    });
+    // console.log('🎭 Rôles mis à jour:', {
+    //   role: userProfile.role,
+    //   isSuperAdmin: newIsSuperAdmin,
+    //   isAdmin: newIsAdmin,
+    //   isEditor: newIsEditor
+    // });
   };
 
   const signIn = async (email: string, password: string, rememberMe: boolean = false) => {
@@ -185,6 +189,7 @@ export function useAuth() {
     profile,
     session,
     loading,
+    initializing,
     isAdmin,
     isEditor,
     isSuperAdmin,

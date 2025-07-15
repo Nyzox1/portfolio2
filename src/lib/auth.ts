@@ -51,31 +51,31 @@ export class AuthService {
     if (this.initialized) return;
 
     try {
-      console.log('🔄 Initialisation AuthService...');
+      // console.log('🔄 Initialisation AuthService...');
       
       // Récupérer la session actuelle
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) {
-        console.warn('⚠️ Erreur getSession:', error.message);
+        // console.warn('⚠️ Erreur getSession:', error.message);
         // Ne pas bloquer l'initialisation pour cette erreur
       }
 
       if (session?.user) {
-        console.log('👤 Session trouvée, chargement du profil...');
+        // console.log('👤 Session trouvée, chargement du profil...');
         this.currentUser = session.user;
         await this.loadUserProfile(session.user.id);
       } else {
-        console.log('👤 Aucune session active');
+        // console.log('👤 Aucune session active');
       }
 
       // Charger les paramètres système
       await this.loadSystemSettings();
 
       this.initialized = true;
-      console.log('✅ AuthService initialisé');
+      // console.log('✅ AuthService initialisé');
     } catch (error) {
-      console.error('❌ Erreur initialisation AuthService:', error);
+      // console.error('❌ Erreur initialisation AuthService:', error);
       this.initialized = true; // Marquer comme initialisé même en cas d'erreur
     }
   }
@@ -85,7 +85,7 @@ export class AuthService {
    */
   private async loadUserProfile(userId: string): Promise<void> {
     try {
-      console.log('📊 Chargement profil pour:', userId);
+      // console.log('📊 Chargement profil pour:', userId);
       
       const { data: profile, error } = await supabase
         .from('user_profiles')
@@ -94,11 +94,11 @@ export class AuthService {
         .single();
 
       if (error) {
-        console.warn('⚠️ Erreur chargement profil:', error.message);
+        // console.warn('⚠️ Erreur chargement profil:', error.message);
         
         // Si le profil n'existe pas, le créer
         if (error.code === 'PGRST116') {
-          console.log('🔧 Création du profil manquant...');
+          // console.log('🔧 Création du profil manquant...');
           await this.createMissingProfile(userId);
           return;
         }
@@ -108,9 +108,9 @@ export class AuthService {
       }
 
       this.currentProfile = profile;
-      console.log('✅ Profil chargé:', profile.role, profile.status);
+      // console.log('✅ Profil chargé:', profile.role, profile.status);
     } catch (error) {
-      console.warn('⚠️ Erreur loadUserProfile:', error);
+      // console.warn('⚠️ Erreur loadUserProfile:', error);
       this.currentProfile = null;
     }
   }
@@ -139,14 +139,14 @@ export class AuthService {
         .single();
 
       if (error) {
-        console.error('❌ Erreur création profil:', error);
+        // console.error('❌ Erreur création profil:', error);
         return;
       }
 
       this.currentProfile = data;
-      console.log('✅ Profil créé:', data.role);
+      // console.log('✅ Profil créé:', data.role);
     } catch (error) {
-      console.error('❌ Erreur createMissingProfile:', error);
+      // console.error('❌ Erreur createMissingProfile:', error);
     }
   }
 
@@ -160,7 +160,7 @@ export class AuthService {
         .select('setting_key, setting_value');
 
       if (error) {
-        console.warn('⚠️ Erreur paramètres système:', error.message);
+        // console.warn('⚠️ Erreur paramètres système:', error.message);
         this.setDefaultSettings();
         return;
       }
@@ -184,9 +184,9 @@ export class AuthService {
         session_timeout_hours: settings.session_timeout_hours ?? 24
       };
 
-      console.log('⚙️ Paramètres système chargés');
+      // console.log('⚙️ Paramètres système chargés');
     } catch (error) {
-      console.warn('⚠️ Erreur loadSystemSettings:', error);
+      // console.warn('⚠️ Erreur loadSystemSettings:', error);
       this.setDefaultSettings();
     }
   }
@@ -210,7 +210,7 @@ export class AuthService {
     error: Error | null;
   }> {
     try {
-      console.log('🔑 Tentative connexion:', email);
+      // console.log('🔑 Tentative connexion:', email);
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -218,13 +218,13 @@ export class AuthService {
       });
 
       if (error) {
-        console.error('❌ Erreur connexion:', error.message);
+        // console.error('❌ Erreur connexion:', error.message);
         await this.logLoginAttempt(email, false, error.message);
         return { user: null, session: null, error };
       }
 
       if (data.user) {
-        console.log('✅ Connexion réussie');
+        // console.log('✅ Connexion réussie');
         this.currentUser = data.user;
         await this.loadUserProfile(data.user.id);
         await this.updateLastLogin(data.user.id);
@@ -233,7 +233,7 @@ export class AuthService {
 
       return { user: data.user, session: data.session, error: null };
     } catch (error) {
-      console.error('❌ Erreur signIn:', error);
+      // console.error('❌ Erreur signIn:', error);
       return { user: null, session: null, error: error as Error };
     }
   }
@@ -246,7 +246,7 @@ export class AuthService {
     error: Error | null;
   }> {
     try {
-      console.log('📝 Inscription:', email);
+      // console.log('📝 Inscription:', email);
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -259,14 +259,14 @@ export class AuthService {
       });
 
       if (error) {
-        console.error('❌ Erreur inscription:', error.message);
+        // console.error('❌ Erreur inscription:', error.message);
         return { user: null, error };
       }
 
-      console.log('✅ Inscription réussie');
+      // console.log('✅ Inscription réussie');
       return { user: data.user, error: null };
     } catch (error) {
-      console.error('❌ Erreur signUp:', error);
+      // console.error('❌ Erreur signUp:', error);
       return { user: null, error: error as Error };
     }
   }
@@ -276,19 +276,19 @@ export class AuthService {
    */
   async signOut(): Promise<{ error: Error | null }> {
     try {
-      console.log('👋 Déconnexion...');
+      // console.log('👋 Déconnexion...');
       
       const { error } = await supabase.auth.signOut();
       
       if (!error) {
         this.currentUser = null;
         this.currentProfile = null;
-        console.log('✅ Déconnexion réussie');
+        // console.log('✅ Déconnexion réussie');
       }
 
       return { error };
     } catch (error) {
-      console.error('❌ Erreur signOut:', error);
+      // console.error('❌ Erreur signOut:', error);
       return { error: error as Error };
     }
   }
@@ -305,7 +305,7 @@ export class AuthService {
         throw new Error('Permissions insuffisantes');
       }
 
-      console.log('👥 Création utilisateur:', email, role);
+      // console.log('👥 Création utilisateur:', email, role);
 
       const { data, error } = await supabase.auth.admin.createUser({
         email,
@@ -331,10 +331,10 @@ export class AuthService {
           });
       }
 
-      console.log('✅ Utilisateur créé');
+      // console.log('✅ Utilisateur créé');
       return { user: data.user, error: null };
     } catch (error) {
-      console.error('❌ Erreur createUser:', error);
+      // console.error('❌ Erreur createUser:', error);
       return { user: null, error: error as Error };
     }
   }
@@ -353,7 +353,7 @@ export class AuthService {
           user_agent: navigator.userAgent
         }]);
     } catch (error) {
-      console.warn('⚠️ Erreur log tentative:', error);
+      // console.warn('⚠️ Erreur log tentative:', error);
     }
   }
 
@@ -364,7 +364,7 @@ export class AuthService {
         .update({ last_login_at: new Date().toISOString() })
         .eq('id', userId);
     } catch (error) {
-      console.warn('⚠️ Erreur update last login:', error);
+      // console.warn('⚠️ Erreur update last login:', error);
     }
   }
 
