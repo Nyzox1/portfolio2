@@ -64,11 +64,16 @@ const Dashboard = () => {
         .select('id');
 
       // Charger l'activité récente
-      const { data: activity } = await supabase
+      const { data: activity, error: activityError } = await supabase
         .from('content_history')
         .select('id, action, content_type, created_at')
         .order('created_at', { ascending: false })
         .limit(10);
+
+      // Si la table n'existe pas encore, on ignore l'erreur
+      if (activityError && !activityError.message.includes('does not exist')) {
+        console.error('Erreur lors du chargement de l\'activité:', activityError);
+      }
 
       setStats({
         totalProjects: projects?.length || 0,
@@ -264,7 +269,7 @@ const Dashboard = () => {
                 ))
               ) : (
                 <p className="text-gray-400 text-center py-4">
-                  Aucune activité récente
+                  {stats.recentActivity.length === 0 ? 'Aucune activité récente' : 'Chargement de l\'activité...'}
                 </p>
               )}
             </div>
